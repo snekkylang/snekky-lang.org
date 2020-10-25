@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="title" content="Snekky Programming Language">
+    <meta name="description" content="Programming language written in Haxe inspired by JavaScript's syntax.">
+    <meta name="keywords" content="programming, language, code, snekky">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="author" content="Senk Ju">
+    <meta property="og:title" content="Snekky Programming Language">
+    <meta property="og:type" content="programming language">
+    <meta property="og:image" content="/img/snek-large.png">
+    <meta property="og:description" content="Programming language written in Haxe inspired by JavaScript's syntax.">
+
+    </script>
+    <link rel="icon" type="image/png" href="img/snek.png">
+
+    <title>Snekky Playground</title>
+
+    <link href="css/style.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <img src="img/snek.png" alt="logo" class="logo">
+
+        <div class="description">
+            <h1>Snekky</h1>
+            <a href="https://github.com/snekkylang/snekky" target="_blank">Source Code</a>
+            &bull;
+            <a href="https://github.com/snekkylang/snekky/releases" target="_blank">Binaries</a>
+            &bull;
+            <a href="https://github.com/snekkylang/snekky/tree/master/examples" target="_blank">Examples</a>
+        </div>
+
+        <div class="buttons">
+            <button class="button-run" id="buttonRun"><i class="fa fa-play" aria-hidden="true"></i> Run</button>
+            <button class="button-disassemble" id="buttonDisassemble">
+                <i class="fa fa-bug" aria-hidden="true"></i>
+                Disassemble</button>
+            <button class="button-new" id="buttonNew"><i class="fa fa-file-o" aria-hidden="true"></i> New</button>
+            <button class="button-save" id="buttonSave"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+        </div>
+
+        <div class="code-wrapper">
+            <select class="example-select" id="selectExamples">
+                <option disabled hidden>Loading...</option>
+            </select>
+            <div class="code-textarea" id="codeArea"></div>
+        </div>
+
+        <div class="console" id="console"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+    <script src="js/snekky.js"></script>
+    <script src="js/index.js"></script>
+</body>
+
+</html>
