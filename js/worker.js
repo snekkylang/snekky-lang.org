@@ -5,15 +5,23 @@ onmessage = function(e) {
         postMessage({ type: "print", msg: m });
     };
 
-    const byteCode = Snekky.compileString("playground.snek", e.data.code, true, false);
+    let byteCode;
+    try {
+        byteCode = Snekky.compileString("playground.snek", e.data.code, true, false);
+    } catch (err) {
+        postMessage({ type: "exit", success: false });
+        return;
+    }
 
     if (e.data.type === "eval") {
         try {
             Snekky.evaluateBytes(byteCode);
-        } catch(err) { }
+        } catch(err) {
+
+        }
     } else {
         SnekkyD.disassemble(byteCode);
     }
     
-    postMessage({ type: "exit" });
+    postMessage({ type: "exit", success: true });
 };

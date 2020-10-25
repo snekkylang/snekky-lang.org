@@ -90,9 +90,11 @@ buttonDisassemble.addEventListener("click", () => {
 
     worker.onmessage = function(e) {
         if (e.data.type == "exit") {
+            if (e.data.success) {
+                consoleOut.appendChild(table);
+            }
             buttonDisassemble.removeAttribute("disabled");
             buttonDisassemble.innerHTML = `<i class="fa fa-bug" aria-hidden="true"></i> Disassemble`;
-            consoleOut.appendChild(table);
         } else {
             const insData = e.data.msg[0].split(" | ");
 
@@ -131,7 +133,7 @@ buttonRun.addEventListener("click", () => {
             const output = document.createElement("pre");
             output.innerHTML = e.data.msg;
             consoleOut.scrollTop = consoleOut.scrollHeight;
-        
+            
             consoleOut.appendChild(output);
         }
     }
