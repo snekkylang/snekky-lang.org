@@ -63,7 +63,6 @@ buttonNew.addEventListener("click", () => {
 });
 
 buttonDisassemble.addEventListener("click", () => {
-    buttonDisassemble.innerHTML = `<i class="fa fa-spinner" aria-hidden="true"></i> Disassembling...`;
     buttonDisassemble.disabled = "disabled";
 
     consoleOut.innerHTML = "";
@@ -89,35 +88,47 @@ buttonDisassemble.addEventListener("click", () => {
     titleRow.appendChild(insDataCol);
 
     worker.onmessage = function(e) {
-        if (e.data.type == "exit") {
-            if (e.data.success) {
-                consoleOut.appendChild(table);
+        switch (e.data.type) {
+            case "exit": {
+                if (e.data.success) {
+                    consoleOut.appendChild(table);
+                }
+                buttonDisassemble.removeAttribute("disabled");
+                buttonDisassemble.innerHTML = `<i class="fa fa-bug" aria-hidden="true"></i> Disassemble`;
+
+                break;
             }
-            buttonDisassemble.removeAttribute("disabled");
-            buttonDisassemble.innerHTML = `<i class="fa fa-bug" aria-hidden="true"></i> Disassemble`;
-        } else {
-            const insData = e.data.msg[0].split(" | ");
+            case "state": {
+                buttonDisassemble.innerHTML = `<i class="fa fa-spinner" aria-hidden="true"></i> ${e.data.msg}`;
 
-            const insRow = document.createElement("tr");
-            const insCountCol = document.createElement("td");
-            insCountCol.innerHTML = insData[0];
-            insRow.appendChild(insCountCol);
-        
-            const insPosCol = document.createElement("td");
-            insPosCol.innerHTML = insData[1];
-            insRow.appendChild(insPosCol);
-        
-            const insDataCol = document.createElement("td");
-            insDataCol.innerHTML = insData[2];
-            insRow.appendChild(insDataCol);
+                break;
+            }
 
-            table.appendChild(insRow);
+            case "print": {
+                const insData = e.data.msg[0].split(" | ");
+
+                const insRow = document.createElement("tr");
+                const insCountCol = document.createElement("td");
+                insCountCol.innerHTML = insData[0];
+                insRow.appendChild(insCountCol);
+            
+                const insPosCol = document.createElement("td");
+                insPosCol.innerHTML = insData[1];
+                insRow.appendChild(insPosCol);
+            
+                const insDataCol = document.createElement("td");
+                insDataCol.innerHTML = insData[2];
+                insRow.appendChild(insDataCol);
+    
+                table.appendChild(insRow); 
+
+                break;
+            }
         }
     }
 });
 
 buttonRun.addEventListener("click", () => {
-    buttonRun.innerHTML = `<i class="fa fa-spinner" aria-hidden="true"></i> Running...`;
     buttonRun.disabled = "disabled";
 
     consoleOut.innerHTML = "";
@@ -126,15 +137,28 @@ buttonRun.addEventListener("click", () => {
     worker.postMessage({ type: "eval", code: code });
 
     worker.onmessage = function(e) {
-        if (e.data.type == "exit") {
-            buttonRun.removeAttribute("disabled");
-            buttonRun.innerHTML = `<i class="fa fa-play" aria-hidden="true"></i> Run`;
-        } else {
-            const output = document.createElement("pre");
-            output.innerHTML = e.data.msg;
-            consoleOut.scrollTop = consoleOut.scrollHeight;
-            
-            consoleOut.appendChild(output);
+        switch (e.data.type) {
+            case "exit": {
+                buttonRun.removeAttribute("disabled");
+                buttonRun.innerHTML = `<i class="fa fa-play" aria-hidden="true"></i> Run`;
+
+                break;
+            }
+            case "state": {
+                buttonRun.innerHTML = `<i class="fa fa-spinner" aria-hidden="true"></i> ${e.data.msg}`;
+
+                break;
+            }
+            case "print": {
+                const output = document.createElement("pre");
+                output.innerHTML = e.data.msg;
+                consoleOut.scrollTop = consoleOut.scrollHeight;
+                
+                consoleOut.appendChild(output);
+
+                break;
+            }
+
         }
     }
 });
