@@ -5,11 +5,16 @@
     import ExampleGroup from "./playground/ExampleGroup.svelte";
     import FileGroup from "./playground/FileGroup.svelte";
 
+    let exampleCode = "";
     let code = "";
 
     let outputMessages = [];
 
     function handleExampleChange(e) {
+        exampleCode = e.detail.value;
+    }
+
+    function handleCodeChange(e) {
         code = e.detail.value;
     }
 
@@ -103,7 +108,7 @@
                 <div class="snekky-version">Version: {Snekky.Version}</div>
             </div>
 
-            <CodeEditor value={code} />
+            <CodeEditor on:codeChange={handleCodeChange} value={exampleCode} />
 
             <Output {outputMessages}></Output>
 

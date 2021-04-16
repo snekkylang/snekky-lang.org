@@ -1,4 +1,5 @@
 <script>
+    import { createEventDispatcher } from "svelte";
     import { onMount, afterUpdate } from "svelte";
 
     export let value;
@@ -6,11 +7,18 @@
     let editorElement;
     let editor;
 
+    const dispatch = createEventDispatcher();
+
     onMount(() => {
         editor = ace.edit(editorElement);
         editor.setTheme("ace/theme/xcode");
         editor.getSession().setMode("ace/mode/javascript");
         editor.getSession().setUseWorker(false);
+        editor.getSession().on("change", () => {
+            dispatch("codeChange", {
+                value: editor.getValue()
+            });
+        });
         editor.setValue(value);
         editor.clearSelection();
 
