@@ -1,8 +1,13 @@
-importScripts("snekky.js", "snekkyp.js", "snekkyd.js");
+importScripts("snekky.js", "snekkyp.js", "snekkyd.js", "ansi_up.js");
 
 onmessage = function(e) {
+    const ansiUp = new AnsiUp();
+
+    const log = console.log;
     console.log = function(...m) {
-        postMessage({ type: "print", msg: m });
+        let html = ansiUp.ansi_to_html(m[0]);
+        log(html);
+        postMessage({ type: "print", msg: html });
     };
 
     postMessage({ type: "state", msg: "Compiling..." });
@@ -33,7 +38,7 @@ onmessage = function(e) {
         }
         case "decompile": {
             postMessage({ type: "state", msg: "Decompiling..." });
-            postMessage({ type: "print", msg: [SnekkyDecompiler.decompileBytes(byteCode)] });
+            postMessage({ type: "print", msg: SnekkyDecompiler.decompileBytes(byteCode) });
 
             break;
         }

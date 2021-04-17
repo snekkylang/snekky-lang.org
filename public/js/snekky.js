@@ -157,6 +157,44 @@ Console.printFormatted = function(s,outputStream) {
 			}
 		}
 		switch(Console.formatMode) {
+		case 0:
+			if(open) {
+				if(activeFormatFlagStack.length > 0) {
+					var lastFlagCount = groupedProceedingTags[groupedProceedingTags.length - 1] + 1;
+					var asciiFormatString = "";
+					var _g = 0;
+					var _g1 = lastFlagCount;
+					while(_g < _g1) {
+						var i = _g++;
+						var idx = groupedProceedingTags.length - 1 - i;
+						asciiFormatString += Console.getAsciiFormat(activeFormatFlagStack[idx]);
+					}
+					return asciiFormatString;
+				} else {
+					return "";
+				}
+			} else {
+				var result = Console.getAsciiFormat("reset");
+				var result1 = new Array(activeFormatFlagStack.length);
+				var _g = 0;
+				var _g1 = activeFormatFlagStack.length;
+				while(_g < _g1) {
+					var i = _g++;
+					result1[i] = Console.getAsciiFormat(activeFormatFlagStack[i]);
+				}
+				var _g = [];
+				var _g1 = 0;
+				var _g2 = result1;
+				while(_g1 < _g2.length) {
+					var v = _g2[_g1];
+					++_g1;
+					if(v != null) {
+						_g.push(v);
+					}
+				}
+				return result + _g.join("");
+			}
+			break;
 		case 1:
 			var browserFormatArguments1 = browserFormatArguments;
 			var result = new Array(activeFormatFlagStack.length);
@@ -463,15 +501,15 @@ Console.determineConsoleFormatMode = function() {
 	return 2;
 };
 Console.joinArgs = function(rest) {
-	var msg = { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString("",haxe_macro_StringLiteralKind.SingleQuotes)), pos : { file : "/opt/hostedtoolcache/haxe/4.2.0/x64/lib/console,hx/0,2,12/Console.hx", min : 19027, max : 19029}};
+	var msg = { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString("",haxe_macro_StringLiteralKind.SingleQuotes)), pos : { file : "D:\\Dokumente\\GitHub\\snekky\\.haxelib\\console,hx/0,2,12/Console.hx", min : 18979, max : 18981}};
 	var _g = 0;
 	var _g1 = rest.length;
 	while(_g < _g1) {
 		var i = _g++;
 		var e = rest[i];
-		msg = { expr : haxe_macro_ExprDef.EBinop(haxe_macro_Binop.OpAdd,msg,e), pos : { file : "/opt/hostedtoolcache/haxe/4.2.0/x64/lib/console,hx/0,2,12/Console.hx", min : 19095, max : 19104}};
+		msg = { expr : haxe_macro_ExprDef.EBinop(haxe_macro_Binop.OpAdd,msg,e), pos : { file : "D:\\Dokumente\\GitHub\\snekky\\.haxelib\\console,hx/0,2,12/Console.hx", min : 19047, max : 19056}};
 		if(i != rest.length - 1) {
-			msg = { expr : haxe_macro_ExprDef.EBinop(haxe_macro_Binop.OpAdd,msg,{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString("$argSeparator",haxe_macro_StringLiteralKind.SingleQuotes)), pos : { file : "/opt/hostedtoolcache/haxe/4.2.0/x64/lib/console,hx/0,2,12/Console.hx", min : 19159, max : 19174}}), pos : { file : "/opt/hostedtoolcache/haxe/4.2.0/x64/lib/console,hx/0,2,12/Console.hx", min : 19152, max : 19174}};
+			msg = { expr : haxe_macro_ExprDef.EBinop(haxe_macro_Binop.OpAdd,msg,{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString("$argSeparator",haxe_macro_StringLiteralKind.SingleQuotes)), pos : { file : "D:\\Dokumente\\GitHub\\snekky\\.haxelib\\console,hx/0,2,12/Console.hx", min : 19111, max : 19126}}), pos : { file : "D:\\Dokumente\\GitHub\\snekky\\.haxelib\\console,hx/0,2,12/Console.hx", min : 19104, max : 19126}};
 		}
 	}
 	return msg;
@@ -563,6 +601,7 @@ Snekky.tokenizeString = function(filename,code) {
 	return new lexer_Lexer(filename,code);
 };
 Snekky.compileString = function(filename,code,debug,compress,warnings) {
+	Console.formatMode = 0;
 	var lexer = new lexer_Lexer(filename,code);
 	var parser = new parser_Parser(lexer,false);
 	parser.generateAst();
@@ -7527,7 +7566,7 @@ Console.debugPrefix = "<b,magenta>><//> ";
 Console.argSeparator = " ";
 Console.unicodeCompatibilityMode = 0;
 Console.unicodeCompatibilityEnabled = false;
-Console.formatTagPattern = new EReg("<(/)?([^><{}\\s]*|{[^}<>]*})>","g");
+Console.formatTagPattern = new EReg("<(/)?([^><\\{\\}\\s]*|\\{[^\\}<>]*\\})>","g");
 FormatFlag.RESET = "reset";
 FormatFlag.BOLD = "bold";
 FormatFlag.ITALIC = "italic";

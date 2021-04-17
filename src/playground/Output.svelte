@@ -13,7 +13,7 @@
 
 <div class="output" bind:this={outputElement}>
     {#each outputMessages as m}
-        <pre in:fade="{{ duration: 200 }}" class="output-message">{m}</pre>
+        <pre in:fade="{{ duration: 200 }}" class="output-message">{@html m}</pre>
     {/each}
 </div>
 

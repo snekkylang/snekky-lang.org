@@ -40,7 +40,7 @@
         worker.onmessage = e => {
             switch (e.data.type) {
                 case "print": {
-                    outputMessages = [...outputMessages, e.data.msg[0]];
+                    outputMessages = [...outputMessages, e.data.msg];
 
                     break;
                 }
