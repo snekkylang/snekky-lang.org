@@ -14,8 +14,8 @@
         values: [],
     };
 
-    async function handleExampleChange(example) {
-        dispatch("exampleChange", {
+    async function handleCodeChange(example) {
+        dispatch("codeChange", {
 			value: await fetch(examples.find(e => e.name === example).download_url)
                 .then(res => res.text())
 		});
@@ -36,7 +36,7 @@
 
         examplesPopup = examplesPopup;
         examples = response;
-        handleExampleChange("mod_inv.snek");
+        handleCodeChange("mod_inv.snek");
     }
 
     fetchExamples();
@@ -44,7 +44,7 @@
 
 <ButtonGroup>
     <Select
-        onChange={handleExampleChange}
+        onChange={handleCodeChange}
         text="Example"
         icon="fa-code"
         popup={examplesPopup}

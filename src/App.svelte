@@ -5,20 +5,19 @@
     import ExampleGroup from "./playground/ExampleGroup.svelte";
     import FileGroup from "./playground/FileGroup.svelte";
 
-    let exampleCode = "";
+    let editor;
+    function getEditor(e) {
+        editor = e;
+    }
     let code = "";
 
     let outputMessages = [];
-
-    function handleExampleChange(e) {
-        exampleCode = e.detail.value;
-    }
 
     function handleCodeChange(e) {
         code = e.detail.value;
     }
 
-    function handleExampleSave(e) {
+    function handleCodeSave(e) {
         let content = new Blob([code], {
             type: "text/plain",
         });
@@ -50,17 +49,17 @@
 
         switch (action) {
             case "Run": {
-                worker.postMessage({ type: "eval", code: code });
+                worker.postMessage({ type: "eval", code: editor.getValue() });
 
                 break;
             }
             case "Disassemble": {
-                worker.postMessage({ type: "disassemble", code: code });
+                worker.postMessage({ type: "disassemble", code: editor.getValue() });
 
                 break;
             }
             case "Decompile": {
-                worker.postMessage({ type: "decompile", code: code });
+                worker.postMessage({ type: "decompile", code: editor.getValue() });
 
                 break;
             }
@@ -99,16 +98,16 @@
         <div class="playground">
             <div class="buttons-wrapper">
                 <RunGroup on:executeCode={handleExecuteCode} />
-                <ExampleGroup on:exampleChange={handleExampleChange} />
+                <ExampleGroup on:codeChange={handleCodeChange} />
                 <FileGroup
-                    on:exampleChange={handleExampleChange}
-                    on:exampleSave={handleExampleSave}
+                    on:codeChange={handleCodeChange}
+                    on:codeSave={handleCodeSave}
                 />
 
                 <div class="snekky-version">Version: {Snekky.Version}</div>
             </div>
 
-            <CodeEditor on:codeChange={handleCodeChange} value={exampleCode} />
+            <CodeEditor on:codeChange={handleCodeChange} value={code} getEditor={getEditor} />
 
             <Output {outputMessages}></Output>
 

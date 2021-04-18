@@ -7,13 +7,13 @@
     const dispatch = createEventDispatcher();
 
     function newFile() {
-        dispatch("exampleChange", {
-            value: "",
+        dispatch("codeChange", {
+            value: ""
         });
     }
 
     function saveFile() {
-        dispatch("exampleSave", {});
+        dispatch("codeSave", {});
     }
 </script>
 

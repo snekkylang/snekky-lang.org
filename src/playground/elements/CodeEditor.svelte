@@ -3,6 +3,7 @@
     import { onMount, afterUpdate } from "svelte";
 
     export let value;
+    export let getEditor;
 
     let editorElement;
     let editor;
@@ -14,11 +15,7 @@
         editor.setTheme("ace/theme/xcode");
         editor.getSession().setMode("ace/mode/javascript");
         editor.getSession().setUseWorker(false);
-        editor.getSession().on("change", () => {
-            dispatch("codeChange", {
-                value: editor.getValue()
-            });
-        });
+        getEditor(editor);
         editor.setValue(value);
         editor.clearSelection();
 
