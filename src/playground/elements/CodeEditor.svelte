@@ -13,7 +13,7 @@
     onMount(() => {
         editor = ace.edit(editorElement);
         editor.setTheme("ace/theme/xcode");
-        editor.getSession().setMode("ace/mode/javascript");
+        editor.getSession().setMode("ace/mode/snekky");
         editor.getSession().setUseWorker(false);
         getEditor(editor);
         editor.setValue(value);
