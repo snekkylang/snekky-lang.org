@@ -14,7 +14,7 @@
 
 <div class="output" bind:this={outputElement}>
     {#if executing}
-        Runnning...
+        Running...
     {/if}{#each outputMessages as m}
         <pre in:fade="{{ duration: 200 }}" class="output-message">{@html m}</pre>
     {/each}
