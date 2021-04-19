@@ -3,6 +3,7 @@
     import { fade } from "svelte/transition";
 
     export let outputMessages;
+    export let executing;
 
     let outputElement;
 
@@ -12,6 +13,9 @@
 </script>
 
 <div class="output" bind:this={outputElement}>
+    {#if executing}
+        Runnning...
+    {/if}
     {#each outputMessages as m}
         <pre in:fade="{{ duration: 200 }}" class="output-message">{@html m}</pre>
     {/each}

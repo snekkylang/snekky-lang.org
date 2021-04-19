@@ -31,10 +31,12 @@
         download.click();
     }
 
+    let executing = false;
     function handleExecuteCode(e) {
         const action = e.detail.action;
         const worker = new Worker("js/worker.js");
         outputMessages = [];
+        executing = true;
 
         worker.onmessage = e => {
             switch (e.data.type) {
@@ -43,7 +45,11 @@
 
                     break;
                 }
+                case "exit": {
+                    executing = false;
 
+                    break;
+                }
             }
         };
 
@@ -109,7 +115,7 @@
 
             <CodeEditor on:codeChange={handleCodeChange} value={code} getEditor={getEditor} />
 
-            <Output {outputMessages}></Output>
+            <Output {outputMessages} {executing}></Output>
 
             <footer class="footer">
                 Website is inspired by
