@@ -187,4 +187,22 @@
     .header .logo-wrapper .logo {
         width: 130px;
     }
+
+    .playground {
+        margin-bottom: 60px;
+    }
+
+    @media only screen and (max-width: 500px) {
+        .snekky-version {
+            display: none;
+        }
+
+        .playground {
+            margin-bottom: 20px;
+        }
+
+        .header {
+            margin-top: 20px;
+        }
+    }
 </style>

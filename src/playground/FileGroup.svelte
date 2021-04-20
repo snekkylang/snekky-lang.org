@@ -17,8 +17,18 @@
     }
 </script>
 
-<ButtonGroup>
-    <Button onClick={newFile} text="New" icon={null} special={false} />
-    <ButtonDivider />
-    <Button onClick={saveFile} text="Save" icon={null} special={false} />
-</ButtonGroup>
+<div class="wrapper">
+    <ButtonGroup>
+        <Button onClick={newFile} text="New" icon={null} special={false} />
+        <ButtonDivider />
+        <Button onClick={saveFile} text="Save" icon={null} special={false} />
+    </ButtonGroup>
+</div>
+
+<style>
+    @media only screen and (max-width: 500px) {
+        .wrapper {
+            display: none;
+        }
+    }
+</style>
