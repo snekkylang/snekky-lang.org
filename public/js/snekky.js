@@ -601,7 +601,6 @@ Snekky.tokenizeString = function(filename,code) {
 	return new lexer_Lexer(filename,code);
 };
 Snekky.compileString = function(filename,code,debug,compress,warnings) {
-	Console.formatMode = 0;
 	var lexer = new lexer_Lexer(filename,code);
 	var parser = new parser_Parser(lexer,false);
 	parser.generateAst();
@@ -1106,13 +1105,8 @@ compiler_Compiler.prototype = {
 		this.emit(30,node.position,[length]);
 	}
 	,compileArray: function(node) {
-		var _g = 0;
-		var _g1 = node.values;
-		while(_g < _g1.length) {
-			var value = _g1[_g];
-			++_g;
-			this.compile(value);
-		}
+		var i = node.values.length;
+		while(--i >= 0) this.compile(node.values[i]);
 		this.emit(29,node.position,[node.values.length]);
 	}
 	,compileRange: function(node) {
@@ -7344,7 +7338,7 @@ vm_VirtualMachine.prototype = {
 				if(o == null) {
 					this.error.error("failed to evaluate expression");
 				}
-				arrayValues.unshift(o);
+				arrayValues.push(o);
 			}
 			var _this = this.stack;
 			_this.head = new haxe_ds_GenericCell(new object_ArrayObj(arrayValues,this),_this.head);

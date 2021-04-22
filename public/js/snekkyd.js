@@ -92,14 +92,19 @@ var ast_BlockNode = function(parent) {
 	this.indentWidth = 0;
 	this.body = [];
 	this.parent = parent;
-	if(parent != null) {
-		this.indentWidth = parent.indentWidth + 1;
-	}
+	this.indentWidth = this.getIndentWidth();
 };
 ast_BlockNode.__name__ = true;
 ast_BlockNode.__super__ = ast_Node;
 ast_BlockNode.prototype = $extend(ast_Node.prototype,{
-	addNode: function(node) {
+	getIndentWidth: function() {
+		if(this.parent != null) {
+			return this.parent.indentWidth + 1;
+		} else {
+			return this.indentWidth;
+		}
+	}
+	,addNode: function(node) {
 		this.body.push(node);
 	}
 	,repeatString: function(r,s) {
@@ -114,7 +119,7 @@ ast_BlockNode.prototype = $extend(ast_Node.prototype,{
 	}
 	,toString: function() {
 		var s_b = "";
-		if(this.indentWidth > 0) {
+		if(this.getIndentWidth() > 0) {
 			s_b += "{\r\n";
 		}
 		var _g = 0;
@@ -122,12 +127,12 @@ ast_BlockNode.prototype = $extend(ast_Node.prototype,{
 		while(_g < _g1.length) {
 			var node = _g1[_g];
 			++_g;
-			s_b += Std.string(this.repeatString(this.indentWidth,"    "));
+			s_b += Std.string(this.repeatString(this.getIndentWidth(),"    "));
 			s_b += Std.string(node.toString());
 			s_b += "\r\n";
 		}
-		s_b += Std.string(this.repeatString(this.indentWidth - 1,"    "));
-		if(this.indentWidth > 0) {
+		s_b += Std.string(this.repeatString(this.getIndentWidth() - 1,"    "));
+		if(this.getIndentWidth() > 0) {
 			s_b += "}";
 		}
 		return s_b;
@@ -203,7 +208,15 @@ ast_IfNode.prototype = $extend(ast_Node.prototype,{
 		s_b += Std.string(this.consequence.toString());
 		if(this.alternative.body.length > 0) {
 			s_b += " else ";
-			s_b += Std.string(this.alternative.toString());
+			if(this.alternative.body.length == 1 && ((this.alternative.body[0]) instanceof ast_IfNode)) {
+				var cIf = js_Boot.__cast(this.alternative.body[0] , ast_IfNode);
+				cIf.alternative.indentWidth = this.alternative.indentWidth;
+				cIf.consequence.indentWidth = this.alternative.indentWidth;
+				this.alternative.indentWidth--;
+				s_b += Std.string(cIf.toString());
+			} else {
+				s_b += Std.string(this.alternative.toString());
+			}
 		}
 		return s_b;
 	}
@@ -294,11 +307,21 @@ ast_VariableAssignNode.__name__ = true;
 ast_VariableAssignNode.__super__ = ast_Node;
 ast_VariableAssignNode.prototype = $extend(ast_Node.prototype,{
 	toString: function() {
+		if(((this.value) instanceof ast_operators_OperatorNode)) {
+			var op = js_Boot.__cast(this.value , ast_operators_OperatorNode);
+			if(((op.left) instanceof ast_IdentNode)) {
+				var left = js_Boot.__cast(op.left , ast_IdentNode);
+				if(left.name == this.name && op.symbol != "><") {
+					return "" + this.name + " " + op.symbol + "= " + Std.string(op.right) + ";\r\n";
+				}
+			}
+		}
 		return "" + this.name + " = " + Std.string(this.value) + ";\r\n";
 	}
 	,__class__: ast_VariableAssignNode
 });
 var ast_VariableNode = function(name,value) {
+	this.mutable = false;
 	this.name = name;
 	this.value = value;
 };
@@ -306,7 +329,11 @@ ast_VariableNode.__name__ = true;
 ast_VariableNode.__super__ = ast_Node;
 ast_VariableNode.prototype = $extend(ast_Node.prototype,{
 	toString: function() {
-		return "mut " + this.name + " = " + Std.string(this.value) + ";\r\n";
+		if(this.mutable) {
+			return "mut " + this.name + " = " + Std.string(this.value) + ";\r\n";
+		} else {
+			return "let " + this.name + " = " + Std.string(this.value) + ";\r\n";
+		}
 	}
 	,__class__: ast_VariableNode
 });
@@ -448,261 +475,253 @@ ast_datatypes_StringNode.__name__ = true;
 ast_datatypes_StringNode.__super__ = ast_Node;
 ast_datatypes_StringNode.prototype = $extend(ast_Node.prototype,{
 	escape: function(s) {
-		return StringTools.replace(s,"\"","\\\"");
+		var t = StringTools.replace(s,"\\","\\\\");
+		t = StringTools.replace(t,"\"","\\\"");
+		t = StringTools.replace(t,"\t","\\t");
+		t = StringTools.replace(t,"\n","\\n");
+		t = StringTools.replace(t,"\r","\\r");
+		t = StringTools.replace(t,"\x08","\\b");
+		t = StringTools.replace(t,"\x0C","\\f");
+		return t;
 	}
 	,toString: function() {
 		return "\"" + this.value + "\"";
 	}
 	,__class__: ast_datatypes_StringNode
 });
-var ast_operators_AddNode = function(left,right) {
+var ast_operators_OperatorNode = function(left,right,symbol,assoc,precedence) {
 	this.left = left;
 	this.right = right;
+	this.symbol = symbol;
+	this.assoc = assoc;
+	this.precedence = precedence;
+};
+ast_operators_OperatorNode.__name__ = true;
+ast_operators_OperatorNode.__super__ = ast_Node;
+ast_operators_OperatorNode.prototype = $extend(ast_Node.prototype,{
+	toString: function() {
+		var buff_b = "";
+		if(((this.left) instanceof ast_operators_OperatorNode)) {
+			var cLeft = js_Boot.__cast(this.left , ast_operators_OperatorNode);
+			if(cLeft.precedence > this.precedence) {
+				buff_b += Std.string("(" + Std.string(this.left) + ")");
+			} else {
+				buff_b += Std.string(this.left.toString());
+			}
+		} else {
+			buff_b += Std.string(this.left.toString());
+		}
+		buff_b += Std.string(" " + this.symbol + " ");
+		if(((this.right) instanceof ast_operators_OperatorNode)) {
+			var cRight = js_Boot.__cast(this.right , ast_operators_OperatorNode);
+			if(cRight.precedence >= this.precedence) {
+				buff_b += Std.string("(" + Std.string(this.right) + ")");
+			} else {
+				buff_b += Std.string(this.right.toString());
+			}
+		} else {
+			buff_b += Std.string(this.right.toString());
+		}
+		return buff_b;
+	}
+	,__class__: ast_operators_OperatorNode
+});
+var ast_operators_AddNode = function(left,right) {
+	ast_operators_OperatorNode.call(this,left,right,"+",ast_operators_Associativity.Left,6);
 };
 ast_operators_AddNode.__name__ = true;
-ast_operators_AddNode.__super__ = ast_Node;
-ast_operators_AddNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " + " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_AddNode
+ast_operators_AddNode.__super__ = ast_operators_OperatorNode;
+ast_operators_AddNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_AddNode
 });
 var ast_operators_AndNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"&&",ast_operators_Associativity.Left,14);
 };
 ast_operators_AndNode.__name__ = true;
-ast_operators_AndNode.__super__ = ast_Node;
-ast_operators_AndNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " && " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_AndNode
+ast_operators_AndNode.__super__ = ast_operators_OperatorNode;
+ast_operators_AndNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_AndNode
 });
 var ast_operators_BitAndNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"&",ast_operators_Associativity.Left,11);
 };
 ast_operators_BitAndNode.__name__ = true;
-ast_operators_BitAndNode.__super__ = ast_Node;
-ast_operators_BitAndNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " & " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_BitAndNode
+ast_operators_BitAndNode.__super__ = ast_operators_OperatorNode;
+ast_operators_BitAndNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_BitAndNode
 });
 var ast_operators_BitNotNode = function(right) {
-	this.right = right;
+	ast_operators_OperatorNode.call(this,null,right,"~",ast_operators_Associativity.Right,3);
 };
 ast_operators_BitNotNode.__name__ = true;
-ast_operators_BitNotNode.__super__ = ast_Node;
-ast_operators_BitNotNode.prototype = $extend(ast_Node.prototype,{
+ast_operators_BitNotNode.__super__ = ast_operators_OperatorNode;
+ast_operators_BitNotNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
 	toString: function() {
-		return "(~" + Std.string(this.right) + ")";
+		if(((this.right) instanceof ast_operators_OperatorNode)) {
+			return "~(" + Std.string(this.right) + ")";
+		} else {
+			return "~" + Std.string(this.right);
+		}
 	}
 	,__class__: ast_operators_BitNotNode
 });
 var ast_operators_BitOrNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"|",ast_operators_Associativity.Left,13);
 };
 ast_operators_BitOrNode.__name__ = true;
-ast_operators_BitOrNode.__super__ = ast_Node;
-ast_operators_BitOrNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " | " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_BitOrNode
+ast_operators_BitOrNode.__super__ = ast_operators_OperatorNode;
+ast_operators_BitOrNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_BitOrNode
 });
 var ast_operators_BitShiftLeftNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"<<",ast_operators_Associativity.Left,7);
 };
 ast_operators_BitShiftLeftNode.__name__ = true;
-ast_operators_BitShiftLeftNode.__super__ = ast_Node;
-ast_operators_BitShiftLeftNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " << " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_BitShiftLeftNode
+ast_operators_BitShiftLeftNode.__super__ = ast_operators_OperatorNode;
+ast_operators_BitShiftLeftNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_BitShiftLeftNode
 });
 var ast_operators_BitShiftRightNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,">>",ast_operators_Associativity.Left,7);
 };
 ast_operators_BitShiftRightNode.__name__ = true;
-ast_operators_BitShiftRightNode.__super__ = ast_Node;
-ast_operators_BitShiftRightNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " >> " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_BitShiftRightNode
+ast_operators_BitShiftRightNode.__super__ = ast_operators_OperatorNode;
+ast_operators_BitShiftRightNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_BitShiftRightNode
 });
 var ast_operators_BitXorNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"^",ast_operators_Associativity.Left,12);
 };
 ast_operators_BitXorNode.__name__ = true;
-ast_operators_BitXorNode.__super__ = ast_Node;
-ast_operators_BitXorNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " ^ " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_BitXorNode
+ast_operators_BitXorNode.__super__ = ast_operators_OperatorNode;
+ast_operators_BitXorNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_BitXorNode
 });
 var ast_operators_ConcatStringNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"><",ast_operators_Associativity.Left,6);
 };
 ast_operators_ConcatStringNode.__name__ = true;
-ast_operators_ConcatStringNode.__super__ = ast_Node;
-ast_operators_ConcatStringNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " >< " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_ConcatStringNode
+ast_operators_ConcatStringNode.__super__ = ast_operators_OperatorNode;
+ast_operators_ConcatStringNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_ConcatStringNode
 });
 var ast_operators_DivideNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"/",ast_operators_Associativity.Left,5);
 };
 ast_operators_DivideNode.__name__ = true;
-ast_operators_DivideNode.__super__ = ast_Node;
-ast_operators_DivideNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " / " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_DivideNode
+ast_operators_DivideNode.__super__ = ast_operators_OperatorNode;
+ast_operators_DivideNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_DivideNode
 });
 var ast_operators_EqualsNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"==",ast_operators_Associativity.Left,10);
 };
 ast_operators_EqualsNode.__name__ = true;
-ast_operators_EqualsNode.__super__ = ast_Node;
-ast_operators_EqualsNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " == " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_EqualsNode
+ast_operators_EqualsNode.__super__ = ast_operators_OperatorNode;
+ast_operators_EqualsNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_EqualsNode
 });
 var ast_operators_GreaterThanNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,">",ast_operators_Associativity.Left,9);
 };
 ast_operators_GreaterThanNode.__name__ = true;
-ast_operators_GreaterThanNode.__super__ = ast_Node;
-ast_operators_GreaterThanNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " > " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_GreaterThanNode
+ast_operators_GreaterThanNode.__super__ = ast_operators_OperatorNode;
+ast_operators_GreaterThanNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_GreaterThanNode
 });
 var ast_operators_GreaterThanOrEqualNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,">=",ast_operators_Associativity.Left,9);
 };
 ast_operators_GreaterThanOrEqualNode.__name__ = true;
-ast_operators_GreaterThanOrEqualNode.__super__ = ast_Node;
-ast_operators_GreaterThanOrEqualNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " >= " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_GreaterThanOrEqualNode
+ast_operators_GreaterThanOrEqualNode.__super__ = ast_operators_OperatorNode;
+ast_operators_GreaterThanOrEqualNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_GreaterThanOrEqualNode
 });
 var ast_operators_LessThanNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"<",ast_operators_Associativity.Left,9);
 };
 ast_operators_LessThanNode.__name__ = true;
-ast_operators_LessThanNode.__super__ = ast_Node;
-ast_operators_LessThanNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " < " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_LessThanNode
+ast_operators_LessThanNode.__super__ = ast_operators_OperatorNode;
+ast_operators_LessThanNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_LessThanNode
 });
 var ast_operators_LessThanOrEqualNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"<=",ast_operators_Associativity.Left,9);
 };
 ast_operators_LessThanOrEqualNode.__name__ = true;
-ast_operators_LessThanOrEqualNode.__super__ = ast_Node;
-ast_operators_LessThanOrEqualNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " <= " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_LessThanOrEqualNode
+ast_operators_LessThanOrEqualNode.__super__ = ast_operators_OperatorNode;
+ast_operators_LessThanOrEqualNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_LessThanOrEqualNode
 });
 var ast_operators_ModuloNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"%",ast_operators_Associativity.Left,5);
 };
 ast_operators_ModuloNode.__name__ = true;
-ast_operators_ModuloNode.__super__ = ast_Node;
-ast_operators_ModuloNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " % " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_ModuloNode
+ast_operators_ModuloNode.__super__ = ast_operators_OperatorNode;
+ast_operators_ModuloNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_ModuloNode
 });
 var ast_operators_MultiplyNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"*",ast_operators_Associativity.Left,5);
 };
 ast_operators_MultiplyNode.__name__ = true;
-ast_operators_MultiplyNode.__super__ = ast_Node;
-ast_operators_MultiplyNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " * " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_MultiplyNode
+ast_operators_MultiplyNode.__super__ = ast_operators_OperatorNode;
+ast_operators_MultiplyNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_MultiplyNode
 });
 var ast_operators_NegateNode = function(right) {
-	this.right = right;
+	ast_operators_OperatorNode.call(this,null,right,"-",ast_operators_Associativity.Right,3);
 };
 ast_operators_NegateNode.__name__ = true;
-ast_operators_NegateNode.__super__ = ast_Node;
-ast_operators_NegateNode.prototype = $extend(ast_Node.prototype,{
+ast_operators_NegateNode.__super__ = ast_operators_OperatorNode;
+ast_operators_NegateNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
 	toString: function() {
-		return "(-" + Std.string(this.right) + ")";
+		if(((this.right) instanceof ast_operators_OperatorNode)) {
+			return "-(" + Std.string(this.right) + ")";
+		} else {
+			return "-" + Std.string(this.right);
+		}
 	}
 	,__class__: ast_operators_NegateNode
 });
 var ast_operators_NotNode = function(right) {
-	this.right = right;
+	ast_operators_OperatorNode.call(this,null,right,"!",ast_operators_Associativity.Right,3);
 };
 ast_operators_NotNode.__name__ = true;
-ast_operators_NotNode.__super__ = ast_Node;
-ast_operators_NotNode.prototype = $extend(ast_Node.prototype,{
+ast_operators_NotNode.__super__ = ast_operators_OperatorNode;
+ast_operators_NotNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
 	toString: function() {
-		return "(!" + Std.string(this.right) + ")";
+		if(((this.right) instanceof ast_operators_EqualsNode)) {
+			var cRight = js_Boot.__cast(this.right , ast_operators_EqualsNode);
+			return "" + Std.string(cRight.left) + " != " + Std.string(cRight.right);
+		} else if(((this.right) instanceof ast_operators_OperatorNode)) {
+			return "!(" + Std.string(this.right) + ")";
+		} else {
+			return "!" + Std.string(this.right);
+		}
 	}
 	,__class__: ast_operators_NotNode
 });
+var ast_operators_Associativity = $hxEnums["ast.operators.Associativity"] = { __ename__:true,__constructs__:null
+	,Left: {_hx_name:"Left",_hx_index:0,__enum__:"ast.operators.Associativity",toString:$estr}
+	,Right: {_hx_name:"Right",_hx_index:1,__enum__:"ast.operators.Associativity",toString:$estr}
+};
+ast_operators_Associativity.__constructs__ = [ast_operators_Associativity.Left,ast_operators_Associativity.Right];
 var ast_operators_OrNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"||",ast_operators_Associativity.Left,15);
 };
 ast_operators_OrNode.__name__ = true;
-ast_operators_OrNode.__super__ = ast_Node;
-ast_operators_OrNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " || " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_OrNode
+ast_operators_OrNode.__super__ = ast_operators_OperatorNode;
+ast_operators_OrNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_OrNode
 });
 var ast_operators_SubtractNode = function(left,right) {
-	this.left = left;
-	this.right = right;
+	ast_operators_OperatorNode.call(this,left,right,"-",ast_operators_Associativity.Left,6);
 };
 ast_operators_SubtractNode.__name__ = true;
-ast_operators_SubtractNode.__super__ = ast_Node;
-ast_operators_SubtractNode.prototype = $extend(ast_Node.prototype,{
-	toString: function() {
-		return "(" + Std.string(this.left) + " - " + Std.string(this.right) + ")";
-	}
-	,__class__: ast_operators_SubtractNode
+ast_operators_SubtractNode.__super__ = ast_operators_OperatorNode;
+ast_operators_SubtractNode.prototype = $extend(ast_operators_OperatorNode.prototype,{
+	__class__: ast_operators_SubtractNode
 });
 var code_Keyword = function() { };
 code_Keyword.__name__ = true;
@@ -879,6 +898,7 @@ debug_VariableTable.prototype = {
 	,__class__: debug_VariableTable
 };
 var decompiler_Decompiler = function(fileData) {
+	this.variableNodes = new haxe_ds_IntMap();
 	this.declaredVariables = [];
 	this.functions = new haxe_ds_IntMap();
 	this.stack = new haxe_ds_GenericStack();
@@ -1554,8 +1574,11 @@ decompiler_Decompiler.prototype = {
 			var name = this.variableTable.resolveVariableName(index);
 			if(this.declaredVariables.indexOf(index) == -1) {
 				this.declaredVariables.push(index);
-				this.currentBlock.addNode(new ast_VariableNode(name,expression));
+				var node = new ast_VariableNode(name,expression);
+				this.variableNodes.h[index] = node;
+				this.currentBlock.addNode(node);
 			} else {
+				this.variableNodes.h[index].mutable = true;
 				this.currentBlock.addNode(new ast_VariableAssignNode(name,expression));
 			}
 			break;
@@ -1623,7 +1646,7 @@ decompiler_Decompiler.prototype = {
 					_this.head = k.next;
 					tmp = k.elt;
 				}
-				arrayValues.unshift(tmp);
+				arrayValues.push(tmp);
 			}
 			var _this = this.stack;
 			_this.head = new haxe_ds_GenericCell(new ast_datatypes_ArrayNode(arrayValues),_this.head);
