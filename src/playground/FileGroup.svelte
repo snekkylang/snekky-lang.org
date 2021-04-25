@@ -15,6 +15,10 @@
     function saveFile() {
         dispatch("codeSave", {});
     }
+
+    function shareCode() {
+        dispatch("shareCode", {});
+    }
 </script>
 
 <div class="wrapper">
@@ -22,6 +26,8 @@
         <Button onClick={newFile} text="New" icon={null} special={false} />
         <ButtonDivider />
         <Button onClick={saveFile} text="Save" icon={null} special={false} />
+        <ButtonDivider />
+        <Button onClick={shareCode} text="Share" icon={null} special={false} />
     </ButtonGroup>
 </div>
 

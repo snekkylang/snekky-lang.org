@@ -36,7 +36,9 @@
 
         examplesPopup = examplesPopup;
         examples = response;
-        handleCodeChange("mod_inv.snek");
+        if (getUrlArgument("gist") === null) {
+            handleCodeChange("mod_inv.snek");
+        }
     }
 
     fetchExamples();

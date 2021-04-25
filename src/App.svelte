@@ -13,12 +13,65 @@
 
     let outputMessages = [];
 
+    async function handleShareCode(e) {
+        let token;
+        if (!localStorage.getItem("github_token")) {
+            token = prompt("Please provide a GitHub personal token with permissions to create Gists.");
+            localStorage.setItem("github_token", token);
+        } else {
+            token = localStorage.getItem("github_token");
+        }
+
+        const body = {
+            description: `Created by snekky-lang.org playground.`,
+            public: false,
+            accept: "application/vnd.github.v3+json",
+            files: {
+                file: {
+                    content: editor.getValue()
+                }
+            }
+        };
+
+        const response = await fetch("https://api.github.com/gists", {
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: {
+                "Authorization": `bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.status === 201) {
+            const gistUrl = data.url.split("/").pop();
+
+            window.location.href = `${window.location.origin}/?gist=${gistUrl}`;
+        } else {
+            alert("Invalid GitHub personal token!");
+            localStorage.removeItem("github_token");
+        }
+    }
+
+    async function loadCodeFromGist() {
+        const gistId = getUrlArgument("gist");
+        const gistInfo = await fetch(`https://api.github.com/gists/${gistId}`)
+            .then(res => res.json());
+
+        const file = await fetch(gistInfo.files.file.raw_url)
+            .then(res => res.text());
+
+        code = file;
+    }
+
+    loadCodeFromGist();
+
     function handleCodeChange(e) {
         code = e.detail.value;
     }
 
     function handleCodeSave(e) {
-        let content = new Blob([code], {
+        let content = new Blob([editor.getValue()], {
             type: "text/plain",
         });
 
@@ -108,6 +161,7 @@
                 <FileGroup
                     on:codeChange={handleCodeChange}
                     on:codeSave={handleCodeSave}
+                    on:shareCode={handleShareCode}
                 />
 
                 <div class="snekky-version">Version: {Snekky.Version}</div>

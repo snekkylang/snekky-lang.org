@@ -6283,6 +6283,13 @@ std_lib_namespaces_StringNamespace.prototype = $extend(std_lib_MemberObject.prot
 });
 var std_lib_namespaces_SysNamespace = function(vm) {
 	std_lib_MemberObject.call(this,vm);
+	this.addFunctionMember("trace",[null],function(p) {
+		var filename = vm.filenameTable.resolve(vm.instructions.pos);
+		var position = vm.lineNumberTable.resolve(vm.instructions.pos);
+		var s = "" + filename + ":" + position.line + ": " + Std.string(p[0]);
+		$global.console.log(s);
+		return p[0];
+	});
 	this.addFunctionMember("println",[null],function(p) {
 		$global.console.log(p[0].toString());
 		return new object_NullObj(vm);
