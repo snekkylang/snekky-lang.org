@@ -157,44 +157,6 @@ Console.printFormatted = function(s,outputStream) {
 			}
 		}
 		switch(Console.formatMode) {
-		case 0:
-			if(open) {
-				if(activeFormatFlagStack.length > 0) {
-					var lastFlagCount = groupedProceedingTags[groupedProceedingTags.length - 1] + 1;
-					var asciiFormatString = "";
-					var _g = 0;
-					var _g1 = lastFlagCount;
-					while(_g < _g1) {
-						var i = _g++;
-						var idx = groupedProceedingTags.length - 1 - i;
-						asciiFormatString += Console.getAsciiFormat(activeFormatFlagStack[idx]);
-					}
-					return asciiFormatString;
-				} else {
-					return "";
-				}
-			} else {
-				var result = Console.getAsciiFormat("reset");
-				var result1 = new Array(activeFormatFlagStack.length);
-				var _g = 0;
-				var _g1 = activeFormatFlagStack.length;
-				while(_g < _g1) {
-					var i = _g++;
-					result1[i] = Console.getAsciiFormat(activeFormatFlagStack[i]);
-				}
-				var _g = [];
-				var _g1 = 0;
-				var _g2 = result1;
-				while(_g1 < _g2.length) {
-					var v = _g2[_g1];
-					++_g1;
-					if(v != null) {
-						_g.push(v);
-					}
-				}
-				return result + _g.join("");
-			}
-			break;
 		case 1:
 			var browserFormatArguments1 = browserFormatArguments;
 			var result = new Array(activeFormatFlagStack.length);
@@ -501,15 +463,15 @@ Console.determineConsoleFormatMode = function() {
 	return 2;
 };
 Console.joinArgs = function(rest) {
-	var msg = { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString("",haxe_macro_StringLiteralKind.SingleQuotes)), pos : { file : "D:\\Dokumente\\GitHub\\snekky\\.haxelib\\console,hx/0,2,12/Console.hx", min : 18979, max : 18981}};
+	var msg = { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString("",haxe_macro_StringLiteralKind.SingleQuotes)), pos : { file : "/opt/hostedtoolcache/haxe/4.2.0/x64/lib/console,hx/0,2,12/Console.hx", min : 19027, max : 19029}};
 	var _g = 0;
 	var _g1 = rest.length;
 	while(_g < _g1) {
 		var i = _g++;
 		var e = rest[i];
-		msg = { expr : haxe_macro_ExprDef.EBinop(haxe_macro_Binop.OpAdd,msg,e), pos : { file : "D:\\Dokumente\\GitHub\\snekky\\.haxelib\\console,hx/0,2,12/Console.hx", min : 19047, max : 19056}};
+		msg = { expr : haxe_macro_ExprDef.EBinop(haxe_macro_Binop.OpAdd,msg,e), pos : { file : "/opt/hostedtoolcache/haxe/4.2.0/x64/lib/console,hx/0,2,12/Console.hx", min : 19095, max : 19104}};
 		if(i != rest.length - 1) {
-			msg = { expr : haxe_macro_ExprDef.EBinop(haxe_macro_Binop.OpAdd,msg,{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString("$argSeparator",haxe_macro_StringLiteralKind.SingleQuotes)), pos : { file : "D:\\Dokumente\\GitHub\\snekky\\.haxelib\\console,hx/0,2,12/Console.hx", min : 19111, max : 19126}}), pos : { file : "D:\\Dokumente\\GitHub\\snekky\\.haxelib\\console,hx/0,2,12/Console.hx", min : 19104, max : 19126}};
+			msg = { expr : haxe_macro_ExprDef.EBinop(haxe_macro_Binop.OpAdd,msg,{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString("$argSeparator",haxe_macro_StringLiteralKind.SingleQuotes)), pos : { file : "/opt/hostedtoolcache/haxe/4.2.0/x64/lib/console,hx/0,2,12/Console.hx", min : 19159, max : 19174}}), pos : { file : "/opt/hostedtoolcache/haxe/4.2.0/x64/lib/console,hx/0,2,12/Console.hx", min : 19152, max : 19174}};
 		}
 	}
 	return msg;
@@ -652,6 +614,16 @@ StringBuf.prototype = {
 };
 var StringTools = function() { };
 StringTools.__name__ = true;
+StringTools.lpad = function(s,c,l) {
+	if(c.length <= 0) {
+		return s;
+	}
+	var buf_b = "";
+	l -= s.length;
+	while(buf_b.length < l) buf_b += c == null ? "null" : "" + c;
+	buf_b += s == null ? "null" : "" + s;
+	return buf_b;
+};
 StringTools.rpad = function(s,c,l) {
 	if(c.length <= 0) {
 		return s;
@@ -1006,6 +978,15 @@ ast_nodes_datatypes_StringNode.__super__ = ast_nodes_Node;
 ast_nodes_datatypes_StringNode.prototype = $extend(ast_nodes_Node.prototype,{
 	__class__: ast_nodes_datatypes_StringNode
 });
+var build_Version = function() { };
+build_Version.__name__ = true;
+build_Version.getFormattedData = function() {
+	var date = new Date();
+	var dd = StringTools.lpad(Std.string(date.getDate()),"0",2);
+	var mm = StringTools.lpad(Std.string(date.getMonth() + 1),"0",2);
+	var yyyy = date.getFullYear();
+	return "" + yyyy + "-" + mm + "-" + dd;
+};
 var code_Code = function() { };
 code_Code.__name__ = true;
 code_Code.make = function(op,operands) {
@@ -2209,7 +2190,7 @@ error_CompileError.prototype = {
 		error_ErrorHelper.exit();
 	}
 	,importFailed: function(token,fileName) {
-		this.printErrorHead(token.position,"failed to import file `" + this.filename + "`");
+		this.printErrorHead(token.position,"failed to import file `" + fileName + "`");
 		this.printCode(token.position,token.position.lineOffset + token.literal.length);
 		error_ErrorHelper.exit();
 	}
@@ -4796,15 +4777,19 @@ object_ArrayObj.__name__ = true;
 object_ArrayObj.__super__ = object_Object;
 object_ArrayObj.prototype = $extend(object_Object.prototype,{
 	toString: function() {
-		var _this = this.value;
-		var result = new Array(_this.length);
-		var _g = 0;
-		var _g1 = _this.length;
-		while(_g < _g1) {
-			var i = _g++;
-			result[i] = _this[i].toString();
+		var buffer_b = "";
+		buffer_b += "[";
+		var iterator_current = 0;
+		var iterator_array = this.value;
+		while(iterator_current < iterator_array.length) {
+			var v = iterator_array[iterator_current++];
+			buffer_b += Std.string(v.toString());
+			if(iterator_current < iterator_array.length) {
+				buffer_b += ", ";
+			}
 		}
-		return result.toString();
+		buffer_b += "]";
+		return buffer_b;
 	}
 	,equals: function(o) {
 		if(o.type != object_ObjectType.Array) {
@@ -7550,6 +7535,8 @@ if( String.fromCodePoint == null ) String.fromCodePoint = function(c) { return c
 String.prototype.__class__ = String;
 String.__name__ = true;
 Array.__name__ = true;
+Date.prototype.__class__ = Date;
+Date.__name__ = "Date";
 var Int = { };
 var Dynamic = { };
 var Float = Number;
@@ -7567,7 +7554,7 @@ Console.debugPrefix = "<b,magenta>><//> ";
 Console.argSeparator = " ";
 Console.unicodeCompatibilityMode = 0;
 Console.unicodeCompatibilityEnabled = false;
-Console.formatTagPattern = new EReg("<(/)?([^><\\{\\}\\s]*|\\{[^\\}<>]*\\})>","g");
+Console.formatTagPattern = new EReg("<(/)?([^><{}\\s]*|{[^}<>]*})>","g");
 FormatFlag.RESET = "reset";
 FormatFlag.BOLD = "bold";
 FormatFlag.ITALIC = "italic";
@@ -7608,7 +7595,8 @@ FormatFlag.BG_LIGHT_BLUE = "bg_light_blue";
 FormatFlag.BG_LIGHT_MAGENTA = "bg_light_magenta";
 FormatFlag.BG_LIGHT_CYAN = "bg_light_cyan";
 FormatFlag.BG_LIGHT_WHITE = "bg_light_white";
-Snekky.Version = "0.9.0";
+Snekky.Version = "0.9.0 [7ee57c9] (2021-05-27)";
+build_Version.SemVersion = "0.9.0";
 code_OpCode.Constant = 0;
 code_OpCode.Pop = 1;
 code_OpCode.Jump = 2;

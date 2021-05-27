@@ -4,6 +4,7 @@
     import RunGroup from "./playground/RunGroup.svelte";
     import ExampleGroup from "./playground/ExampleGroup.svelte";
     import FileGroup from "./playground/FileGroup.svelte";
+    import Version from "./playground/Version.svelte";
 
     let editor;
     function getEditor(e) {
@@ -16,7 +17,7 @@
     async function handleShareCode(e) {
         let token;
         if (!localStorage.getItem("github_token")) {
-            token = prompt("Please provide a GitHub personal token with permissions to create Gists.");
+            token = prompt("Please provide a GitHub personal token with permissions to create Gists. It will NOT be sent to our server.");
             localStorage.setItem("github_token", token);
         } else {
             token = localStorage.getItem("github_token");
@@ -164,7 +165,7 @@
                     on:shareCode={handleShareCode}
                 />
 
-                <div class="snekky-version">Version: {Snekky.Version}</div>
+                <Version />
             </div>
 
             <CodeEditor on:codeChange={handleCodeChange} value={code} getEditor={getEditor} />
@@ -182,15 +183,6 @@
 </main>
 
 <style>
-    .snekky-version {
-        margin: 20px 10px 20px 0;
-        display: flex;
-        align-items: flex-end;
-        font-size: 12px;
-        font-weight: 600;
-        color: #5A5A58;
-    }
-
     .buttons-wrapper {
         display: flex;
         flex-direction: row;
