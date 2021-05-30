@@ -3,7 +3,7 @@
     sha = sha.replace("[", "").replace("]", "");
 </script>
 
-<pre class="version">Version: {version} <a target="_blank" href="https://github.com/snekkylang/snekky/commit/{sha}">[{sha}]</a></pre>
+<pre class="version">Version: {version} <a class="sha" target="_blank" href="https://github.com/snekkylang/snekky/commit/{sha}">[{sha}]</a></pre>
 
 <style>
     .version {
@@ -24,5 +24,11 @@
 
     a:hover {
         text-decoration: underline;
+    }
+
+    @media only screen and (max-width: 700px) {
+        .sha {
+            display: none;
+        }
     }
 </style>
