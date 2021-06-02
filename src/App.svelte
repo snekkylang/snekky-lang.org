@@ -135,7 +135,7 @@
                 <h1>Snekky Language</h1>
             </div>
             <div class="links">
-                <a href="https://github.com/snekkylang/snekky" target="_blank">
+                <a href="https://github.com/snekkylang" target="_blank">
                     Source Code
                 </a>
                 &bull;
