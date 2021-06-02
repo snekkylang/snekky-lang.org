@@ -1,0 +1,26 @@
+name: website
+
+on: [push]
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.0
+      - name: Build website
+        run: |
+          chmod +x build.sh
+          ./build.sh
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: snekky-website
+          path: public
