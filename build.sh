@@ -16,7 +16,7 @@ cp js/snekkyd.js ../public/js/
 cd ..
 
 echo "Building snekkyp.."
-cd snekkyd
+cd snekkyp
 haxelib install hxcpp --quiet
 haxe build-js.hxml
 cp js/snekkyp.js ../public/js/
