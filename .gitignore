@@ -1,4 +1,7 @@
 /node_modules/
 /public/build/
+/public/js/snekky.js
+/public/js/snekkyd.js
+/public/js/snekkyp.js
 
 .DS_Store

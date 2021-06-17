@@ -38,7 +38,7 @@
         min-height: 400px;
         font-size: 16px;
         padding: 5px;
-        font-family: monospace;
+        font-family: "Fira Code", monospace;
         box-shadow: 0px 0px 5px 0px rgba(140, 140, 136, 1);
         border-radius: 3px;
         resize: vertical;
