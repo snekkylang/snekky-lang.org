@@ -26,13 +26,17 @@
         height: 200px;
         font-size: 16px;
         padding: 10px;
-        font-family: "Fira Code", monospace;
         box-shadow: 0px 0px 5px 0px rgba(140, 140, 136, 1);
         border-radius: 3px;
         background-color: white;
         margin-top: 15px;
         resize: vertical;
         overflow: auto;
+        font-family: "Fira Code", monospace;
+    }
+
+    .output-message {
+        font-family: "Fira Code", monospace;
     }
 
     .output:empty::before {
