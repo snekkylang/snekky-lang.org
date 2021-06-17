@@ -239,10 +239,6 @@
     }
 
     @media only screen and (max-width: 500px) {
-        .snekky-version {
-            display: none;
-        }
-
         .playground {
             margin-bottom: 20px;
         }
