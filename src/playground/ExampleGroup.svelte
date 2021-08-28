@@ -14,7 +14,7 @@
         values: [],
     };
 
-    let currentExample = "mod_inv.snek";
+    let currentExample = "Example";
 
     async function handleCodeChange(example) {
         dispatch("codeChange", {
