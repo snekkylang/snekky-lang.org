@@ -59,6 +59,9 @@
 
     async function loadCodeFromGist() {
         const gistId = getUrlArgument("gist");
+        if (gistId === null) {
+            return;
+        }
         const gistInfo = await fetch(`https://api.github.com/gists/${gistId}`)
             .then(res => res.json());
 
