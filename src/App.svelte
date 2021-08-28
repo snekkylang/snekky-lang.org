@@ -50,7 +50,7 @@
         if (response.status === 201) {
             const gistUrl = data.url.split("/").pop();
 
-            window.location.href = `${window.location.origin}/?gist=${gistUrl}`;
+            window.location.href = `${window.location.origin}/#gist=${gistUrl}`;
         } else {
             alert("Invalid GitHub personal token!");
             localStorage.removeItem("github_token");

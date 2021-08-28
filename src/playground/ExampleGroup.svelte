@@ -14,11 +14,14 @@
         values: [],
     };
 
+    let currentExample = "mod_inv.snek";
+
     async function handleCodeChange(example) {
         dispatch("codeChange", {
 			value: await fetch(examples.find(e => e.name === example).download_url)
                 .then(res => res.text())
 		});
+        window.location.href = `${window.location.origin}/#example=${example}`;
     }
 
     async function fetchExamples() {
@@ -37,7 +40,8 @@
         examplesPopup = examplesPopup;
         examples = response;
         if (getUrlArgument("gist") === null) {
-            handleCodeChange("mod_inv.snek");
+            currentExample = getUrlArgument("example") || "mod_inv.snek";
+            handleCodeChange(currentExample);
         }
     }
 
@@ -47,7 +51,7 @@
 <ButtonGroup>
     <Select
         onChange={handleCodeChange}
-        text="Example"
+        text={currentExample}
         icon="fa-code"
         popup={examplesPopup}
     />
