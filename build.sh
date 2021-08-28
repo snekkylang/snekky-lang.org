@@ -4,7 +4,7 @@ cd snekky
 haxelib install console.hx 0.2.12 --quiet
 haxelib install hxcpp --quiet
 haxelib install hxargs --quiet
-haxe build-js.hxml
+haxe scripts/build-js.hxml
 cp js/snekky.js ../public/js/
 cd ..
 
