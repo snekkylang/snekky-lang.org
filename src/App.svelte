@@ -18,6 +18,9 @@
         let token;
         if (!localStorage.getItem("github_token")) {
             token = prompt("Please provide a GitHub personal token with permissions to create Gists. It will NOT be sent to our server.");
+            if (!token) {
+                return;
+            }
             localStorage.setItem("github_token", token);
         } else {
             token = localStorage.getItem("github_token");
