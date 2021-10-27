@@ -7,3 +7,6 @@
 [submodule "snekkyp"]
 	path = snekkyp
 	url = https://github.com/snekkylang/snekkyp
+[submodule "hex-viewer"]
+	path = hex-viewer
+	url = https://github.com/snekkylang/hex-viewer
