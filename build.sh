@@ -22,6 +22,14 @@ haxe build-js.hxml
 cp js/snekkyp.js ../public/js/
 cd ..
 
+echo "Building hex-viewer"
+cd hex-viewer
+haxelib install hxcpp --quiet
+haxelib install console.hx 0.2.12 --quiet
+haxe js.hxml
+cp bin/js/hexviewer.js ../public/js/
+cd ..
+
 echo "Building website..."
 npm install
 npm run build

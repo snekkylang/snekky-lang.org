@@ -1,4 +1,4 @@
-importScripts("snekky.js", "snekkyp.js", "snekkyd.js", "ansi_up.js");
+importScripts("snekky.js", "snekkyp.js", "snekkyd.js", "hexviewer.js", "ansi_up.js");
 
 onmessage = function(e) {
     const ansiUp = new AnsiUp();
@@ -6,7 +6,6 @@ onmessage = function(e) {
     const log = console.log;
     console.log = function(...m) {
         let html = ansiUp.ansi_to_html(m[0]);
-        log(html);
         postMessage({ type: "print", msg: html });
     };
 
@@ -39,6 +38,12 @@ onmessage = function(e) {
         case "decompile": {
             postMessage({ type: "state", msg: "Decompiling..." });
             postMessage({ type: "print", msg: SnekkyDecompiler.decompileBytes(byteCode) });
+
+            break;
+        }
+        case "showHex": {
+            postMessage({ type: "state", msg: "Decoding..." });
+            HexViewer.printBytes(byteCode);
 
             break;
         }

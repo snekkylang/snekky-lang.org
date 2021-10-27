@@ -129,6 +129,11 @@
 
                 break;
             }
+            case "Show hex": {
+                worker.postMessage({ type: "showHex", code: editor.getValue() });
+
+                break;
+            }
         }
     }
 </script>
