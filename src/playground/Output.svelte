@@ -33,6 +33,7 @@
         resize: vertical;
         overflow: auto;
         font-family: "Fira Code", monospace;
+        font-variant-ligatures: none;
     }
 
     .output-message {
