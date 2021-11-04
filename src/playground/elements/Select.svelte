@@ -101,7 +101,7 @@
     .popup {
         position: fixed;
         background-color: white;
-        box-shadow: 0px 0px 5px 0px rgba(140, 140, 136, 1);
+        filter: drop-shadow(0 0 3px rgba(140, 140, 136, 0.9));
         border-radius: 4px;
         z-index: 1000;
         max-width: 270px;

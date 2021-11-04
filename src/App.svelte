@@ -185,9 +185,7 @@
 
             <footer class="footer">
                 Website is inspired by
-                <a href="https://play.rust-lang.org/" target="_blank">
-                    Rust's playground
-                </a>.
+                <a href="https://play.rust-lang.org/" target="_blank">Rust's playground</a>.
             </footer>
         </div>
     </div>
